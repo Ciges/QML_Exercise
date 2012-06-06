@@ -1,0 +1,6 @@
+Litte application made in QT & QML for learning purposes.
+
+This app queries a web service with a JSON API and shows its response.
+
+All this work is licensed under the GNU GPL 3.0 http://www.gnu.org/licenses/gpl-3.0.html
+June 2012 - José Manuel Ciges Regueiro
