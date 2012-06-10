@@ -20,6 +20,7 @@ Rectangle {
                 id: txtURLInput
                 placeholderText: "Write the URL of the web service"
                 width: parent.width - btnGo.width - toolBar.spacing
+                text: "http://api.trakt.tv/search/movies.json/e521ecb2eb453ca1eff7583ab4d7d1a6/batman";
             }
             Button {
                 id: btnGo
@@ -28,22 +29,41 @@ Rectangle {
                 width: 80
                 text: "Go"
                 onClicked:  {
-                    // TODO:
+                    if (txtURLInput.text.trim() == "")   {
+                        txtData.text = "Error: You must introduce an URL in the text field";
+                    }
+                    else    {
+                        var answer_url = new XMLHttpRequest();
+                        answer_url.onreadystatechange = function () {
+                                    if (answer_url.readyState == XMLHttpRequest.DONE)   {
+                                        if (answer_url.status == 200)   {
+                                            var json_data = answer_url.responseText;
+                                            txtData.text = json_data;
+                                        }
+                                        else    {
+                                            txtData.text = "Error:  There was a problem with the URL. The server returner error code" + answer_url.status
+                                        }
+                                    }
+                                }
+                        answer_url.open("GET", txtURLInput.text.trim());
+                        answer_url.send();
+                    }
                 }
 
             }
 
         }
         Row {
-            id: dataVisualization
+            id: dataRow
 
             width: parent.width
             height: parent.height - toolBar.height - parent.spacing
 
             TextArea    {
-                id: txtArea
+                id: txtData
                 readOnly: true
-                anchors.fill: parent
+                width: parent.width
+                height: parent.height
             }
         }
     }
