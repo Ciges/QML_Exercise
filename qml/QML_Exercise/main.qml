@@ -2,10 +2,14 @@
 import QtQuick 1.1
 import QtDesktop 0.1
 
+//TODO:  Quita la dirección de ejemplo de TrakTV
+//TODO:  ¿Separar el JavaScript en un fichero aparte?
+
 Rectangle {
-    id: mainWindows
+    id: mainWindow
     width: 800
     height: 600
+    state: "WAITING"
 
     // Recursive fonction that returns as text and elegantlly indented the structure of a JSON document
     function process_JSON(json_data, prefix)    {
@@ -47,20 +51,51 @@ Rectangle {
         return result ;
     }
 
+    states: [
+        State {
+            name: "WAITING"
+            PropertyChanges { target: txtState; text: "Waiting for user input ..."}
+        },
+        State {
+            name: "LOADING"
+            PropertyChanges { target: txtState; text: "Loading data from the network ..."}
+
+        },
+        State {
+            name: "READY"
+            PropertyChanges { target: txtState; text: "Data received"}
+        },
+        State {
+            name: "ERROR"
+            PropertyChanges { target: txtState; text: "Error!"}
+        }
+
+    ]
+
     Column {
         anchors.margins: 5
         anchors.fill: parent
-        spacing: 10
+        spacing: 5
         Row {
             id: toolBar
 
             spacing: 10
             width: parent.width
+
             TextField {
                 id: txtURLInput
                 placeholderText: "Write the URL of the web service"
-                width: parent.width - btnGo.width - toolBar.spacing
-                text: "http://api.trakt.tv/search/movies.json/e521ecb2eb453ca1eff7583ab4d7d1a6/batman";
+                width: parent.width - cmbMethod.width - btnGo.width - toolBar.spacing*2
+            }
+
+            ComboBox {
+                id: cmbMethod
+                anchors.verticalCenter: toolBar.verticalCenter
+
+                model: ListModel {
+                    ListElement { name: "GET" }
+                    ListElement { name: "POST" }
+                }
             }
 
             Button {
@@ -72,13 +107,21 @@ Rectangle {
                 onClicked:  {
                     if (txtURLInput.text.trim() == "")   {
                         txtData.text = "Error: You must introduce an URL in the text field";
+                        mainWindow.state = "ERROR";
                     }
                     else    {
                         var answer_url = new XMLHttpRequest();
                         answer_url.onreadystatechange = function () {
                                     if (answer_url.readyState == XMLHttpRequest.DONE)   {
                                         if (answer_url.status == 200)   {
-                                            var json_data = JSON.parse(answer_url.responseText);
+                                            try {
+                                                var json_data = JSON.parse(answer_url.responseText);
+                                            }
+                                            catch (exception)   {
+                                                txtData.text = "Error:  There was a problem with the JSON retourned by the server (malformed or not JSON?)";
+                                                mainWindow.state = "ERROR";
+                                            }
+
                                             // We use [] if it is a list of documents and {} if it is a document with its pairs key-value
                                             if (json_data["0"] != null)   {
                                                 txtData.text = "[\n"+ process_JSON(json_data) + "]\n";
@@ -86,15 +129,18 @@ Rectangle {
                                             else {
                                                 txtData.text = "{\n" + process_JSON(json_data) + "}\n";
                                             }
+                                            mainWindow.state = "READY";
                                         }
                                         else    {
-                                            txtData.text = "Error:  There was a problem with the URL. The server returner error code" + answer_url.status
+                                            txtData.text = "Error:  There was a problem with the URL. The server returner error code " + answer_url.status;
+                                            mainWindow.state = "ERROR";
                                         }
                                     }
                         }
                     }
-                    answer_url.open("GET", txtURLInput.text.trim());
+                    answer_url.open(cmbMethod.selectedText, txtURLInput.text.trim());
                     answer_url.send();
+                    mainWindow.state = "LOADING";
                 }
             }
 
@@ -104,7 +150,7 @@ Rectangle {
             id: dataRow
 
             width: parent.width
-            height: parent.height - toolBar.height - parent.spacing
+            height: parent.height - toolBar.height - parent.spacing - txtState.height
 
             TextArea    {
                 id: txtData
@@ -113,5 +159,14 @@ Rectangle {
                 height: parent.height
             }
         }
+
+        TextArea {
+            id: txtState
+            readOnly: true
+            anchors.fill: parent.fill
+            height: 31
+            frame: false
+        }
+
     }
 }
