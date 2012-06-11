@@ -4,3 +4,21 @@ This app queries a web service with a JSON API and shows its response.
 
 All this work is licensed under the GNU GPL 3.0 http://www.gnu.org/licenses/gpl-3.0.html
 June 2012 - José Manuel Ciges Regueiro
+
+INSTALLING INSTRUCTIONS
+-----------------------
+
+Requisites: qt libraires, QtDesktop componentes for QtQuick
+
+1) Download source code with git
+
+git clone git@github.com:Ciges/QML_Exercise
+
+2) Build and install (files will be installed under /opt/QML_exercise)
+
+cd QML_Exercise/
+qmake
+make
+make install
+
+
