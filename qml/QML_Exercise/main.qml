@@ -86,6 +86,7 @@ Rectangle {
                 id: txtURLInput
                 placeholderText: "Write the URL of the web service"
                 width: parent.width - cmbMethod.width - btnGo.width - toolBar.spacing*2
+                text: "http://www.mitwiz.com/api/v1/events/search/?token=36769e11ca288d1c1cfef36e1f2a9871&q=place:vigo"
             }
 
             ComboBox {
@@ -157,6 +158,7 @@ Rectangle {
                 readOnly: true
                 width: parent.width
                 height: parent.height
+                text: "The example URL shows next events in Vigo City (Pontevedra, Spain) from Mitwiz web service"
             }
         }
 
